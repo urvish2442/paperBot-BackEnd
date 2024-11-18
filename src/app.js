@@ -1,56 +1,99 @@
-const express = require("express");
-const cors = require("cors");
-const cookieParser = require("cookie-parser");
-const userRoutes = require("./routes/user-routes");
-const globalErrorHandler = require("./middlewares/errorHandler");
-const AppError = require("./error/AppError");
-const { swaggerUi, swaggerSpec } = require("./swagger");
+import cookieParser from "cookie-parser";
+import cors from "cors";
+import express from "express";
+import { rateLimit } from "express-rate-limit";
+import fs from "fs";
+import { createServer } from "http";
+import path from "path";
+import requestIp from "request-ip";
+import swaggerUi from "swagger-ui-express";
+import { fileURLToPath } from "url";
+import YAML from "yaml";
+import morganMiddleware from "./logger/morgan.logger.js";
+import { ApiError } from "./utils/ApiError.js";
 
-require("dotenv").config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const file = fs.readFileSync(path.resolve(__dirname, "./swagger.yaml"), "utf8");
+const swaggerDocument = YAML.parse(
+    file?.replace(
+        "- url: ${{server}}",
+        `- url: ${
+            process.env.PROJECT_HOST_URL || "http://localhost:4000"
+        }/api/v1`
+    )
+);
 
 const app = express();
 
-const whiteList = ["http://localhost:3000", "http://127.0.0.1:3000"];
+const httpServer = createServer(app);
 
-const corsOptions = {
-    origin: (origin, callback) => {
-        // Allow requests with no origin (e.g., mobile apps or curl requests)
-        if (!origin || whiteList.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            callback(new AppError("Not allowed by CORS", 403));
-        }
+// global middlewares
+app.use(
+    cors({
+        origin:
+            process.env.CORS_ORIGIN === "*"
+                ? "*"
+                : process.env.CORS_ORIGIN?.split(","),
+        credentials: true,
+    })
+);
+
+app.use(requestIp.mw());
+
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5000, // Limit each IP to 500 requests per `window` (here, per 15 minutes)
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    keyGenerator: (req, res) => {
+        return req.clientIp; // IP address from requestIp.mw(), as opposed to req.ip
     },
-    credentials: true, // Enable cookies to be sent with CORS
-    optionsSuccessStatus: 200,
-};
+    handler: (_, __, ___, options) => {
+        throw new ApiError(
+            options.statusCode || 500,
+            `There are too many requests. You are only allowed ${
+                options.max
+            } requests per ${options.windowMs / 60000} minutes`
+        );
+    },
+});
 
-// Apply CORS and other middlewares
+// Apply the rate limiting middleware to all requests
+app.use(limiter);
+
+app.use(express.json({ limit: "16kb" }));
+app.use(express.urlencoded({ extended: true, limit: "16kb" }));
+app.use(express.static("public")); // configure static file to save images locally
 app.use(cookieParser());
-app.use(express.json());
-app.use(express.static("public"));
 
-// Swagger documentation setup
-// This will serve Swagger UI only at the `/api/v1/docs` route
-app.use("/api/v1/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use(morganMiddleware);
 
-// Test route
-app.get("/api/v1/test", (req, res) => {
-    res.status(200).json({
-        success: true,
-        message: "API is working!",
-    });
-});
+import { errorHandler } from "./middlewares/error.middlewares.js";
+import healthcheckRouter from "./routes/healthcheck.routes.js";
+import userRouter from "./routes/apps/auth/user.routes.js";
 
-// User routes (login should be here)
-app.use("/api/v1/user", userRoutes);
+// * healthcheck
+app.use("/api/v1/healthcheck", healthcheckRouter);
 
-// Handle undefined routes with AppError
-app.all("*", (req, res, next) => {
-    next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
-});
+// * App apis
+app.use("/api/v1/users", userRouter);
 
-// Global error handler middleware
-app.use(globalErrorHandler);
+// * API DOCS
+// ? Keeping swagger code at the end so that we can load swagger on "/" route
+app.use(
+    "/",
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerDocument, {
+        swaggerOptions: {
+            docExpansion: "none", // keep all the sections collapsed by default
+        },
+        customSiteTitle: "FreeAPI docs",
+    })
+);
 
-module.exports = app;
+// common error handling middleware
+app.use(errorHandler);
+
+export { httpServer };

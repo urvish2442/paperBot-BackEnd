@@ -1,31 +1,77 @@
 {
-    "name": "paperbot-backend",
+    "name": "paperbot",
     "version": "1.0.0",
-    "description": "",
-    "main": "index.js",
+    "description": "paperBot app apis",
+    "type": "module",
+    "main": "src/index.js",
     "scripts": {
-        "dev": "nodemon index.js",
-        "start": "node index.js",
-        "format": "prettier --write ."
+        "start": "nodemon -r dotenv/config --experimental-json-modules src/index.js",
+        "pre-commit": "lint-staged",
+        "prepare": "node prepare.js",
+        "start:test-server": "node -r dotenv/config --experimental-json-modules e2e/test-server.js"
     },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/hiteshchoudhary/apihub.git"
+    },
+    "keywords": [
+        "paper bot",
+        "paper generator",
+        "question paper"
+    ],
+    "author": "Urvish Rupareliya",
     "dependencies": {
-        "bcryptjs": "^2.4.3",
-        "body-parser": "^1.20.3",
-        "cookie-parser": "^1.4.6",
+        "@faker-js/faker": "^8.0.2",
+        "bcrypt": "^5.1.0",
+        "cookie-parser": "^1.4.7",
         "cors": "^2.8.5",
-        "dotenv": "^16.4.5",
-        "express": "^4.21.0",
-        "express-validator": "^7.2.0",
-        "jsonwebtoken": "^9.0.2",
-        "mongoose": "^8.7.0",
-        "nodemon": "^3.1.7",
-        "swagger-jsdoc": "^6.2.8",
-        "swagger-ui-express": "^5.0.1"
+        "dotenv": "^16.0.3",
+        "express": "4.21.1",
+        "express-compression": "^1.0.2",
+        "express-rate-limit": "^6.7.0",
+        "express-session": "^1.18.1",
+        "express-validator": "^7.0.1",
+        "jsonwebtoken": "^9.0.0",
+        "mailgen": "^2.0.27",
+        "mongoose": "^7.4.0",
+        "mongoose-aggregate-paginate-v2": "^1.0.6",
+        "morgan": "^1.10.0",
+        "multer": "^1.4.5-lts.1",
+        "nanoid": "^4.0.2",
+        "nodemailer": "^6.9.3",
+        "passport": "^0.6.0",
+        "passport-github2": "^0.1.12",
+        "passport-google-oauth20": "^2.0.0",
+        "razorpay": "^2.8.6",
+        "request-ip": "^3.3.0",
+        "socket.io": "^4.8.0",
+        "swagger-ui-express": "^4.6.3",
+        "winston": "^3.11.0",
+        "yaml": "^2.3.1"
     },
     "devDependencies": {
-        "prettier": "^3.3.3"
+        "@babel/core": "^7.23.7",
+        "@babel/plugin-syntax-import-assertions": "^7.23.3",
+        "@babel/preset-env": "^7.23.8",
+        "@commitlint/cli": "^17.6.6",
+        "@commitlint/config-conventional": "^17.6.5",
+        "@shelf/jest-mongodb": "^4.2.0",
+        "@types/node": "^20.11.5",
+        "babel-jest": "^29.7.0",
+        "husky": "^8.0.3",
+        "jest": "^29.7.0",
+        "lint-staged": "^13.2.2",
+        "mongodb-memory-server": "^9.1.6",
+        "nodemon": "^2.0.22",
+        "prettier": "^3.0.0",
+        "supertest": "^6.3.4",
+        "supertest-session": "^5.0.1"
+    },
+    "resolutions": {
+        "ws": "^8.17.1",
+        "ejs": "^3.1.10",
+        "formidable": "^3.5.1",
+        "braces": "^3.0.3",
+        "micromatch": "^4.0.8"
     }
 }
