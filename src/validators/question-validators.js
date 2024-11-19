@@ -25,10 +25,6 @@ const createQuestionValidator = () => {
             .optional()
             .isBoolean()
             .withMessage("isFormatted must be a boolean"),
-        body("created_by")
-            .trim()
-            .notEmpty()
-            .withMessage("Created by is required"),
         body("isActive")
             .optional()
             .isBoolean()

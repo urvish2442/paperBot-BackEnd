@@ -40,11 +40,18 @@ export const createQuestion = asyncHandler(async (req, res) => {
     if (!QuestionModel) {
         throw new ApiError(404, `Question model '${modelName}' not found`);
     }
+    const question = { ...req.body, created_by: req.user._id };
+    const createdQuestion = await QuestionModel.create(question);
 
-    const question = await QuestionModel.create(req.body);
     return res
         .status(201)
-        .json(new ApiResponse(201, question, "Question created successfully"));
+        .json(
+            new ApiResponse(
+                201,
+                createdQuestion,
+                "Question created successfully"
+            )
+        );
 });
 
 // Get Question by ID

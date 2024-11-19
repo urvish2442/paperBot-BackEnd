@@ -84,7 +84,7 @@ export const Subject = mongoose.model("Subject", subjectSchema);
 
 export const getDynamicQuestionModel = (generatedName) => {
     if (mongoose.models[generatedName]) {
-        return mongoose.models[modelName];
+        return mongoose.models[generatedName];
     }
-    return mongoose.model(modelName, QuestionSchema);
+    return mongoose.model(generatedName, QuestionSchema);
 };

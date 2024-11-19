@@ -30,12 +30,10 @@ export const QuestionSchema = questionSchema;
 
 export const checkModelExistence = async (modelName) => {
     try {
-        // Get the list of collections in the current database
         const collections = await mongoose.connection.db
             .listCollections()
             .toArray();
 
-        // Check if the collection exists
         const collectionExists = collections.some(
             (collection) => collection.name === modelName
         );
@@ -44,8 +42,7 @@ export const checkModelExistence = async (modelName) => {
             return false;
         }
 
-        // Dynamically return the model if collection exists
-        return mongoose.model(modelName); // Assumes the model is registered already
+        return mongoose.model(modelName, QuestionSchema);
     } catch (error) {
         console.error("Error checking collection existence:", error);
         throw new Error("Unable to check collection existence");
