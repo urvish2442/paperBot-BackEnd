@@ -72,13 +72,18 @@ app.use(morganMiddleware);
 
 import { errorHandler } from "./middlewares/error.middlewares.js";
 import healthcheckRouter from "./routes/healthcheck.routes.js";
-import userRouter from "./routes/apps/auth/user.routes.js";
+import userRouter from "./routes/user-routes.js";
+import subjectRoutes from "./routes/subject-routes.js";
+import questionRoutes from "./routes/question-routes.js";
 
 // * healthcheck
 app.use("/api/v1/healthcheck", healthcheckRouter);
 
 // * App apis
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/subjects", subjectRoutes);
+app.use("/api/v1/questions", questionRoutes);
+
 
 // * API DOCS
 // ? Keeping swagger code at the end so that we can load swagger on "/" route

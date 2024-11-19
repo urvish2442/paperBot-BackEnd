@@ -90,9 +90,9 @@ export const SUBJECTS = {
 export const AvailableSubjects = Object.values(SUBJECTS);
 
 export const MEDIUMS = {
-    HINDI_MEDIUM: "HINDI_MEDIUM",
-    ENGLISH_MEDIUM: "ENGLISH_MEDIUM",
-    GUJARATI_MEDIUM: "GUJARATI_MEDIUM",
+    HINDI_MED : "HINDI_MED",
+    ENG_MED : "ENG_MED",
+    GUJ_MED : "GUJ_MED",
 };
 export const AvailableMediums = Object.values(MEDIUMS);
 
@@ -104,3 +104,16 @@ export const STANDARDS = {
     STD12: "STD12",
 };
 export const AvailableStandards = Object.values(STANDARDS);
+
+export const QUESTION_TYPES = {
+    MCQ: "MCQ",
+    SHORT_ANSWER: "SHORT_ANSWER",
+    LONG_ANSWER: "LONG_ANSWER",
+    TRUE_FALSE: "TRUE_FALSE",
+    MATCH_THE_FOLLOWING: "MATCH_THE_FOLLOWING",
+    ORDER_THE_FOLLOWING: "ORDER_THE_FOLLOWING",
+    COMPLETE_THE_FOLLOWING: "COMPLETE_THE_FOLLOWING",
+    COMPLETE_THE_SENTENCE: "COMPLETE_THE_SENTENCE",
+    FILL_IN_THE_BLANKS: "FILL_IN_THE_BLANKS",
+};
+export const AvailableQuestionTypes = Object.values(QUESTION_TYPES);
