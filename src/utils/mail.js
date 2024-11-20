@@ -29,6 +29,7 @@ const sendEmail = async (options) => {
     const transporter = nodemailer.createTransport({
         host: process.env.MAILTRAP_SMTP_HOST,
         port: process.env.MAILTRAP_SMTP_PORT,
+        secure: false, // Use TLS
         auth: {
             user: process.env.MAILTRAP_SMTP_USER,
             pass: process.env.MAILTRAP_SMTP_PASS,
@@ -36,7 +37,7 @@ const sendEmail = async (options) => {
     });
 
     const mail = {
-        from: "urvish@demomailtrap.com", // We can name this anything. The mail will go to your Mailtrap inbox
+        from: `"${process.env.PROJECT_NAME}" <${process.env.MAILTRAP_SMTP_USER}>`,
         to: options.email, // receiver's mail
         subject: options.subject, // mail subject
         text: emailTextual, // mailgen content textual variant
@@ -45,6 +46,7 @@ const sendEmail = async (options) => {
 
     try {
         await transporter.sendMail(mail);
+        logger.info(`Email sent successfully to ${options.email}`);
     } catch (error) {
         // As sending email is not strongly coupled to the business logic it is not worth to raise an error when email sending fails
         // So it's better to fail silently rather than breaking the app
@@ -106,9 +108,6 @@ const forgotPasswordMailgenContent = (username, passwordResetUrl) => {
         },
     };
 };
-
-
-
 
 export {
     sendEmail,
