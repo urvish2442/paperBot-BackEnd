@@ -109,8 +109,19 @@ const forgotPasswordMailgenContent = (username, passwordResetUrl) => {
     };
 };
 
+const otpMailgenContent = (username, otp) => {
+    return {
+        body: {
+            name: username,
+            intro: `Your OTP for login is ${otp}. It is valid for 10 minutes.`,
+            outro: "If you did not request this, please ignore this email.",
+        },
+    };
+};
+
 export {
     sendEmail,
     emailVerificationMailgenContent,
     forgotPasswordMailgenContent,
+    otpMailgenContent,
 };

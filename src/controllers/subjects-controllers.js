@@ -3,6 +3,13 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { buildQueryForSubjects } from "../utils/queryBuilders.js";
+import {
+    AvailableBoards,
+    AvailableSubjects,
+    AvailableMediums,
+    AvailableStandards,
+    AvailableQuestionTypes,
+} from "../constants.js";
 
 const generateModelName = (board, standard, name, medium, code) =>
     `${board}_${standard}_${name}_${code}_${medium}_QUESTIONS`.toLowerCase();
@@ -224,6 +231,22 @@ const addMultipleUnits = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, subject.units, "Units added successfully"));
 });
 
+const getAllConstants = asyncHandler(async (req, res) => {
+    const constants = {
+        boards: AvailableBoards,
+        subjects: AvailableSubjects,
+        mediums: AvailableMediums,
+        standards: AvailableStandards,
+        questionTypes: AvailableQuestionTypes,
+    };
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, constants, "All Filters fetched successfully")
+        );
+});
+
 export {
     getAllSubjects,
     createSubject,
@@ -234,4 +257,5 @@ export {
     removeSchoolFromSubject,
     toggleSubjectStatus,
     addMultipleUnits,
+    getAllConstants,
 };

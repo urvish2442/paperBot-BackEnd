@@ -5,6 +5,7 @@ import mongoose, { Schema } from "mongoose";
 import {
     AvailableSocialLogins,
     AvailableUserRoles,
+    USER_LOGIN_OTP_EXPIRY,
     USER_TEMPORARY_TOKEN_EXPIRY,
     UserLoginType,
     UserRolesEnum,
@@ -71,6 +72,12 @@ const userSchema = new Schema(
         emailVerificationExpiry: {
             type: Date,
         },
+        otp: {
+            type: String,
+        },
+        otpExpiry: {
+            type: Date,
+        },
         isActive: {
             type: Boolean,
             default: true,
@@ -121,6 +128,17 @@ userSchema.methods.generateTemporaryToken = function () {
     const tokenExpiry = Date.now() + USER_TEMPORARY_TOKEN_EXPIRY;
 
     return { unHashedToken, hashedToken, tokenExpiry };
+};
+
+// Generate and set OTP on user document
+userSchema.methods.setOTP = function () {
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiry = new Date(Date.now() + USER_LOGIN_OTP_EXPIRY);
+
+    this.otp = otp;
+    this.otpExpiry = otpExpiry;
+
+    return otp;
 };
 
 export const User = mongoose.model("User", userSchema);

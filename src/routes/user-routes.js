@@ -13,6 +13,7 @@ import {
     resendEmailVerification,
     resetForgottenPassword,
     updateUserAvatar,
+    verifyAndLogin,
     verifyEmail,
 } from "../controllers/user-controllers.js";
 import {
@@ -26,6 +27,7 @@ import {
     userLoginValidator,
     userRegisterValidator,
     userResetForgottenPasswordValidator,
+    userVerifyAndLoginValidator,
 } from "../validators/user-validators.js";
 import { validate } from "../validators/validate.js";
 import { upload } from "../middlewares/multer.middlewares.js";
@@ -36,8 +38,9 @@ const app = Router();
 // Unsecured route
 app.route("/register").post(userRegisterValidator(), validate, registerUser);
 app.route("/login").post(userLoginValidator(), validate, loginUser);
+app.route("/verify-and-login").post(userVerifyAndLoginValidator(), validate, verifyAndLogin);
 app.route("/refresh-token").post(refreshAccessToken);
-app.route("/verify-email/:verificationToken").get(verifyEmail);
+// app.route("/verify-email/:verificationToken").get(verifyEmail);
 
 app.route("/forgot-password").post(
     userForgotPasswordValidator(),

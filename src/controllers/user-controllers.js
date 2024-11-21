@@ -13,6 +13,7 @@ import {
 import {
     emailVerificationMailgenContent,
     forgotPasswordMailgenContent,
+    otpMailgenContent,
     sendEmail,
 } from "../utils/mail.js";
 
@@ -115,11 +116,7 @@ const loginUser = asyncHandler(async (req, res) => {
     if (user.loginType !== UserLoginType.EMAIL_PASSWORD) {
         throw new ApiError(
             400,
-            "You have previously registered using " +
-                user.loginType?.toLowerCase() +
-                ". Please use the " +
-                user.loginType?.toLowerCase() +
-                " login option to access your account."
+            `You have previously registered using ${user.loginType?.toLowerCase()}. Please use the ${user.loginType?.toLowerCase()} login option to access your account.`
         );
     }
 
@@ -129,31 +126,88 @@ const loginUser = asyncHandler(async (req, res) => {
         throw new ApiError(401, "Invalid user credentials");
     }
 
+    const otp = user.setOTP();
+    await user.save();
+
+    // await sendEmail({
+    //     email: user.email,
+    //     subject: "Your Login OTP",
+    //     mailgenContent: otpMailgenContent(user.username, otp),
+    // });
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                { email: user.email, otp },
+                "OTP has been sent to your email."
+            )
+        );
+});
+
+const verifyAndLogin = asyncHandler(async (req, res) => {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+        throw new ApiError(400, "Email and OTP are required");
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        throw new ApiError(404, "User does not exist");
+    }
+
+    if (!user.otp || user.otpExpiry < new Date()) {
+        throw new ApiError(400, "OTP has expired. Please request a new one.");
+    }
+
+    if (user.otp !== otp) {
+        throw new ApiError(401, "Invalid OTP. Please try again.");
+    }
+
+    if (!user.isActive) {
+        throw new ApiError(
+            401,
+            "Your account has been deactivated. Please contact support."
+        );
+    }
+
+    if (!user.isEmailVerified) {
+        user.isEmailVerified = true;
+    }
+
+    user.otp = null;
+    user.otpExpiry = null;
+
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
         user._id
     );
 
+    user.refreshToken = refreshToken;
+    await user.save();
+
     const loggedInUser = await User.findById(user._id).select(
-        "-password -refreshToken -emailVerificationToken -emailVerificationExpiry"
+        "-password -emailVerificationToken -emailVerificationExpiry -otp -otpExpiry"
     );
 
-    // TODO: Add more options to make cookie more secure and reliable
     const options = {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
     };
 
+    let response = {
+        user: loggedInUser,
+        accessToken,
+        refreshToken,
+    };
+
     return res
         .status(200)
-        .cookie("accessToken", accessToken, options) // set the access token in the cookie
-        .cookie("refreshToken", refreshToken, options) // set the refresh token in the cookie
-        .json(
-            new ApiResponse(
-                200,
-                { user: loggedInUser, accessToken, refreshToken },
-                "User logged in successfully"
-            )
-        );
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json(new ApiResponse(200, response, "User logged in successfully"));
 });
 
 const logoutUser = asyncHandler(async (req, res) => {
@@ -510,4 +564,64 @@ export {
     resetForgottenPassword,
     updateUserAvatar,
     verifyEmail,
+    verifyAndLogin,
 };
+
+// const loginUser = asyncHandler(async (req, res) => {
+//     const { email, username, password } = req.body;
+
+//     if (!username && !email) {
+//         throw new ApiError(400, "Username or email is required");
+//     }
+
+//     const user = await User.findOne({
+//         $or: [{ username }, { email }],
+//     });
+
+//     if (!user) {
+//         throw new ApiError(404, "User does not exist");
+//     }
+
+//     if (user.loginType !== UserLoginType.EMAIL_PASSWORD) {
+//         throw new ApiError(
+//             400,
+//             "You have previously registered using " +
+//                 user.loginType?.toLowerCase() +
+//                 ". Please use the " +
+//                 user.loginType?.toLowerCase() +
+//                 " login option to access your account."
+//         );
+//     }
+
+//     const isPasswordValid = await user.isPasswordCorrect(password);
+
+//     if (!isPasswordValid) {
+//         throw new ApiError(401, "Invalid user credentials");
+//     }
+
+//     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
+//         user._id
+//     );
+
+//     const loggedInUser = await User.findById(user._id).select(
+//         "-password -refreshToken -emailVerificationToken -emailVerificationExpiry"
+//     );
+
+//     // TODO: Add more options to make cookie more secure and reliable
+//     const options = {
+//         httpOnly: true,
+//         secure: process.env.NODE_ENV === "production",
+//     };
+
+//     return res
+//         .status(200)
+//         .cookie("accessToken", accessToken, options) // set the access token in the cookie
+//         .cookie("refreshToken", refreshToken, options) // set the refresh token in the cookie
+//         .json(
+//             new ApiResponse(
+//                 200,
+//                 { user: loggedInUser, accessToken, refreshToken },
+//                 "User logged in successfully"
+//             )
+//         );
+// });

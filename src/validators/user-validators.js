@@ -33,6 +33,19 @@ const userLoginValidator = () => {
     ];
 };
 
+const userVerifyAndLoginValidator = () => {
+    return [
+        body("email")
+            .trim()
+            .notEmpty()
+            .withMessage("Email is required")
+            .isEmail()
+            .withMessage("Email is invalid"),
+        body("username").optional(),
+        body("otp").notEmpty().withMessage("OTP is required"),
+    ];
+};
+
 const userChangeCurrentPasswordValidator = () => {
     return [
         body("oldPassword").notEmpty().withMessage("Old password is required"),
@@ -70,4 +83,5 @@ export {
     userRegisterValidator,
     userResetForgottenPasswordValidator,
     userAssignRoleValidator,
+    userVerifyAndLoginValidator,
 };
