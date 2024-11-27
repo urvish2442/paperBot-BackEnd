@@ -17,13 +17,12 @@ const generateModelName = (board, standard, name, medium, code) =>
 //** Get All Subjects */
 const getAllSubjects = asyncHandler(async (req, res) => {
     const { aggregatePipeline, paginationOptions } = buildQueryForSubjects(req);
-
     const subjects = await Subject.aggregatePaginate(
-        aggregatePipeline,
+        Subject.aggregate(aggregatePipeline),
         paginationOptions
     );
 
-    if (!subjects || subjects.subjects.length === 0) {
+    if (!subjects) {
         throw new ApiError(404, "No subjects found");
     }
     return res

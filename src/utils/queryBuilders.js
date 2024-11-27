@@ -8,7 +8,7 @@ import {
 export const buildQueryForSubjects = (req) => {
     const reqQuery = { ...req.query };
     let match = {};
-    let sort = {};
+    let sort = { name: 1 };
 
     const page = Number(reqQuery.page) || 1;
     const limit = Number(reqQuery.limit) || 10;
@@ -23,9 +23,9 @@ export const buildQueryForSubjects = (req) => {
                     match.board = reqQuery.board;
                 }
                 break;
-            case "subject":
-                if (AvailableSubjects.includes(reqQuery.subject)) {
-                    match.subject = reqQuery.subject;
+            case "name":
+                if (AvailableSubjects.includes(reqQuery.name)) {
+                    match.name = reqQuery.name;
                 }
                 break;
             case "medium":
@@ -39,27 +39,28 @@ export const buildQueryForSubjects = (req) => {
                 }
                 break;
             case "search":
-                match.name = { $regex: reqQuery.search, $options: "i" };
-                break;
-            case "search":
                 match.$or = [
                     { name: { $regex: reqQuery.search, $options: "i" } },
-                    { model_name: { $regex: reqQuery.search, $options: "i" } },
+                    { model_name: { $regex: reqQuery.search, $options: "i" } }, // Add more fields as needed
                 ];
                 break;
             case "isActive":
                 match.isActive = reqQuery.isActive === "true";
                 break;
             case "sortBy":
-                if (
-                    ["subject", "board", "standard"].includes(reqQuery.sortBy)
-                ) {
-                    sort[reqQuery.sortBy] =
-                        reqQuery.sortOrder === "desc" ? -1 : 1;
-                } else {
-                    sort.subject = 1;
+                if (reqQuery.sortBy) {
+                    const field = reqQuery.sortBy.startsWith("-")
+                        ? reqQuery.sortBy.slice(1) // Remove the "-" prefix
+                        : reqQuery.sortBy;
+
+                    if (["name", "board", "standard"].includes(field)) {
+                        sort[field] = reqQuery.sortBy.startsWith("-") ? -1 : 1; // Descending for "-" prefix
+                    } else {
+                        sort.subject = 1; // Default sorting
+                    }
                 }
                 break;
+
             default:
                 break;
         }
@@ -76,8 +77,8 @@ export const buildQueryForSubjects = (req) => {
             page,
             limit,
             customLabels: {
-                totalDocs: "totalSubjects",
-                docs: "subjects",
+                totalDocs: "count",
+                docs: "data",
             },
         },
     };
