@@ -116,6 +116,44 @@ const updateSubject = asyncHandler(async (req, res) => {
         );
 });
 
+//**ADD Multiple Units */
+
+const addMultipleUnits = asyncHandler(async (req, res) => {
+    const { id } = req.params; // Subject ID from URL
+    const { units } = req.body; // Units array from request body
+
+    // Validate input
+    if (!Array.isArray(units)) {
+        throw new ApiError(400, "Invalid input: units must be an array.");
+    }
+
+    try {
+        // Update the units array
+        const updatedSubject = await Subject.findByIdAndUpdate(
+            id,
+            { units },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedSubject) {
+            throw new ApiError(404, "Subject not found.");
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Units updated successfully.",
+            data: updatedSubject,
+        });
+    } catch (error) {
+        console.error("Error updating units:", error);
+        res.status(500).json({
+            success: false,
+            message: "An error occurred while updating units.",
+            error: error.message,
+        });
+    }
+});
+
 //** Delete Subject */
 const deleteSubject = asyncHandler(async (req, res) => {
     const { id } = req.params;
@@ -206,28 +244,6 @@ const toggleSubjectStatus = asyncHandler(async (req, res) => {
                 `Subject ${isActive ? "activated" : "deactivated"} successfully`
             )
         );
-});
-
-//** Add Multiple Units */
-const addMultipleUnits = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const { units } = req.body;
-
-    if (!Array.isArray(units) || units.length === 0) {
-        throw new ApiError(400, "Units must be a non-empty array");
-    }
-
-    const subject = await Subject.findById(id);
-    if (!subject) {
-        throw new ApiError(404, "Subject not found");
-    }
-
-    subject.units.push(...units);
-    await subject.save();
-
-    return res
-        .status(200)
-        .json(new ApiResponse(200, subject.units, "Units added successfully"));
 });
 
 const getAllConstants = asyncHandler(async (req, res) => {

@@ -25,14 +25,14 @@ const createQuestionValidator = () => {
             .optional()
             .isBoolean()
             .withMessage("isFormatted must be a boolean"),
-        body("isActive")
-            .optional()
-            .isBoolean()
-            .withMessage("isActive must be a boolean"),
-        body("isVerified")
-            .optional()
-            .isBoolean()
-            .withMessage("isVerified must be a boolean"),
+        // body("isActive")
+        //     .optional()
+        //     .isBoolean()
+        //     .withMessage("isActive must be a boolean"),
+        // body("isVerified")
+        //     .optional()
+        //     .isBoolean()
+        //     .withMessage("isVerified must be a boolean"),
     ];
 };
 

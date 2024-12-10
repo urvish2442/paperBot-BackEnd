@@ -21,6 +21,7 @@ const questionSchema = new Schema(
         },
         isActive: { type: Boolean, default: true },
         isVerified: { type: Boolean, default: false },
+        marks: { type: Number, required: true },
     },
     { timestamps: true }
 );
