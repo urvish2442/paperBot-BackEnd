@@ -3,6 +3,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { buildQueryForQuestions } from "../utils/queryBuilders.js";
 import { checkModelExistence } from "../models/modelSchemas.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { UserRolesEnum } from "../constants.js";
 
 // Get All Questions
 export const getQuestions = asyncHandler(async (req, res) => {
@@ -40,7 +41,8 @@ export const createQuestion = asyncHandler(async (req, res) => {
     if (!QuestionModel) {
         throw new ApiError(404, `Question model '${modelName}' not found`);
     }
-    const question = { ...req.body, created_by: req.user._id };
+    const isVerified = req.user.role === UserRolesEnum.ADMIN;
+    const question = { ...req.body, created_by: req.user._id, isVerified };
     const createdQuestion = await QuestionModel.create(question);
 
     return res
