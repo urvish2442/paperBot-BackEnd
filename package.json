@@ -6,6 +6,8 @@
     "main": "index.js",
     "scripts": {
         "dev": "nodemon -r dotenv/config --experimental-json-modules index.js",
+        "build": "echo 'No build step required'",
+        "start": "node -r dotenv/config --experimental-json-modules index.js",
         "pre-commit": "lint-staged",
         "prepare": "node prepare.js",
         "start:test-server": "node -r dotenv/config --experimental-json-modules e2e/test-server.js"

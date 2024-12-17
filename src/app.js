@@ -2,28 +2,20 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
 import { rateLimit } from "express-rate-limit";
-import fs from "fs";
 import { createServer } from "http";
-import path from "path";
 import requestIp from "request-ip";
-import swaggerUi from "swagger-ui-express";
-import { fileURLToPath } from "url";
-import YAML from "yaml";
 import morganMiddleware from "./logger/morgan.logger.js";
 import { ApiError } from "./utils/ApiError.js";
+// import fs from "fs";
+// import { fileURLToPath } from "url";
+// import path from "path";
+// import swaggerUi from "swagger-ui-express";
+// import YAML from "yaml";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
 
-const file = fs.readFileSync(path.resolve(__dirname, "./swagger.yaml"), "utf8");
-const swaggerDocument = YAML.parse(
-    file?.replace(
-        "- url: ${{server}}",
-        `- url: ${
-            process.env.PROJECT_HOST_URL || "http://localhost:4000"
-        }/api/v1`
-    )
-);
+// const file = fs.readFileSync(path.resolve(__dirname, "./swagger.yaml"), "utf8");
 
 const app = express();
 
@@ -84,19 +76,11 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/subjects", subjectRoutes);
 app.use("/api/v1/questions", questionRoutes);
 
-
-// * API DOCS
-// ? Keeping swagger code at the end so that we can load swagger on "/" route
-app.use(
-    "/",
-    swaggerUi.serve,
-    swaggerUi.setup(swaggerDocument, {
-        swaggerOptions: {
-            docExpansion: "none", // keep all the sections collapsed by default
-        },
-        customSiteTitle: "FreeAPI docs",
-    })
-);
+app.get("/", (req, res) => {
+    return res.status(200).json({
+        message: "Welcome to the PaperBot App",
+    });
+});
 
 // common error handling middleware
 app.use(errorHandler);
