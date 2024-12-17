@@ -10,6 +10,7 @@ import {
     AvailableStandards,
     AvailableQuestionTypes,
 } from "../constants.js";
+import { checkModelExistence } from "../models/modelSchemas.js";
 
 const generateModelName = (board, standard, name, medium, code) =>
     `${board}_${standard}_${name}_${code}_${medium}_QUESTIONS`.toLowerCase();
@@ -122,13 +123,13 @@ const addMultipleUnits = asyncHandler(async (req, res) => {
     const { id } = req.params; // Subject ID from URL
     const { units } = req.body; // Units array from request body
 
-    // Validate input
     if (!Array.isArray(units)) {
+        //TODO: validate keys of each unit object
         throw new ApiError(400, "Invalid input: units must be an array.");
     }
 
     try {
-        // Update the units array
+        // Update the units array in the subject
         const updatedSubject = await Subject.findByIdAndUpdate(
             id,
             { units },
@@ -139,9 +140,37 @@ const addMultipleUnits = asyncHandler(async (req, res) => {
             throw new ApiError(404, "Subject not found.");
         }
 
+        const QuestionModel = await checkModelExistence(
+            updatedSubject.model_name
+        );
+        if (!QuestionModel) {
+            throw new ApiError(
+                404,
+                `Question model '${updatedSubject.model_name}' not found`
+            );
+        }
+
+        const unitStatuses = units.reduce((map, unit) => {
+            map[unit._id] = unit.isActive;
+            return map;
+        }, {});
+
+        const bulkOps = Object.entries(unitStatuses).map(
+            ([unitId, isActive]) => ({
+                updateMany: {
+                    filter: { unit: unitId },
+                    update: { isActive },
+                },
+            })
+        );
+
+        if (bulkOps.length > 0) {
+            await QuestionModel.bulkWrite(bulkOps);
+        }
+
         res.status(200).json({
             success: true,
-            message: "Units updated successfully.",
+            message: "Units and questions updated successfully.",
             data: updatedSubject,
         });
     } catch (error) {

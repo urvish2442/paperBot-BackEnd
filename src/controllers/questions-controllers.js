@@ -4,6 +4,7 @@ import { buildQueryForQuestions } from "../utils/queryBuilders.js";
 import { checkModelExistence } from "../models/modelSchemas.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { UserRolesEnum } from "../constants.js";
+import { Subject } from "../models/subjects-models.js";
 
 // Get All Questions
 export const getQuestions = asyncHandler(async (req, res) => {
@@ -107,4 +108,41 @@ export const deleteQuestion = asyncHandler(async (req, res) => {
     return res
         .status(200)
         .json(new ApiResponse(200, null, "Question deleted successfully"));
+});
+
+// Toggle Question Status
+export const toggleQuestionStatus = asyncHandler(async (req, res) => {
+    const { modelName, id } = req.params;
+
+    const QuestionModel = await checkModelExistence(modelName);
+    if (!QuestionModel) {
+        throw new ApiError(404, `Question model '${modelName}' not found`);
+    }
+
+    const question = await QuestionModel.findById(id);
+    if (!question) {
+        throw new ApiError(404, "Question not found");
+    }
+
+    // Fetch the subject and directly filter for the required unit
+    const subject = await Subject.findOne(
+        { model_name: modelName, "units._id": question.unit },
+        { "units.$": 1 }
+    );
+    if (!subject || !subject.units.length) {
+        throw new ApiError(404, "Unit not found");
+    }
+
+    const unit = subject.units[0];
+
+    if (!unit.isActive && !question.isActive) {
+        throw new ApiError(400, "Question cannot be active for this unit");
+    }
+
+    question.isActive = !question.isActive;
+    await question.save();
+
+    res.status(200).json(
+        new ApiResponse(200, question, "Question status toggled successfully")
+    );
 });

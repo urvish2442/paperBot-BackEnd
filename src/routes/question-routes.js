@@ -5,6 +5,7 @@ import {
     getQuestionById,
     updateQuestion,
     deleteQuestion,
+    toggleQuestionStatus,
 } from "../controllers/questions-controllers.js";
 import {
     createQuestionValidator,
@@ -64,5 +65,14 @@ router.delete(
     validate,
     deleteQuestion
 ); // Delete question by ID
+
+router.patch(
+    "/:modelName/:id/active",
+    verifyJWT,
+    verifyPermission([UserRolesEnum.ADMIN]),
+    getQuestionByIdValidator(),
+    validate,
+    toggleQuestionStatus
+);
 
 export default router;

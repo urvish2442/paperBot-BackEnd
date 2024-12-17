@@ -5,6 +5,7 @@ import {
     AvailableMediums,
     AvailableStandards,
     AvailableQuestionTypes,
+    UserRolesEnum,
 } from "../constants.js";
 export const buildQueryForSubjects = (req) => {
     const reqQuery = { ...req.query };
@@ -87,7 +88,12 @@ export const buildQueryForSubjects = (req) => {
 
 export const buildQueryForQuestions = (req) => {
     const reqQuery = { ...req.query };
-    let match = { isActive: true, isVerified: true };
+    const activeObj =
+        req.user.role === UserRolesEnum.ADMIN
+            ? {}
+            : { isActive: true, isVerified: true };
+    let match = { ...activeObj };
+    // let match = { isActive: true, isVerified: true };
     let sort = { type: 1 };
 
     const page = Number(reqQuery.page) || 1;
