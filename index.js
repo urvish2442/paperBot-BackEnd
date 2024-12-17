@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import { httpServer } from "./src/app.js";
 import connectDB from "./src/db/index.js";
-import logger from "./src/logger/winston.logger.js";
+// import logger from "./src/logger/winston.logger.js";
 
 dotenv.config({
     path: "./.env",
@@ -15,12 +15,13 @@ const majorNodeVersion = +process.env.NODE_VERSION?.split(".")[0] || 0;
 
 const startServer = () => {
     httpServer.listen(process.env.PORT || 4000, () => {
-        logger.info(
-            `📑 Visit the documentation at: http://localhost:${
-                process.env.PORT || 4000
-            }`
-        );
-        logger.info("⚙️  Server is running on port: " + process.env.PORT);
+        console.log("🚀 Server is running on port: " + process.env.PORT);
+        // logger.info(
+        //     `📑 Visit the documentation at: http://localhost:${
+        //         process.env.PORT || 4000
+        //     }`
+        // );
+        // logger.info("⚙️  Server is running on port: " + process.env.PORT);
     });
 };
 
@@ -29,7 +30,7 @@ if (majorNodeVersion >= 14) {
         await connectDB();
         startServer();
     } catch (err) {
-        logger.error("Mongo db connect error: ", err);
+        console.log("Mongo db connect error: ", err);
     }
 } else {
     connectDB()
@@ -37,6 +38,6 @@ if (majorNodeVersion >= 14) {
             startServer();
         })
         .catch((err) => {
-            logger.error("Mongo db connect error: ", err);
+            console.log("Mongo db connect error: ", err);
         });
 }
