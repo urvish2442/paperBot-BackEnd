@@ -137,6 +137,9 @@ const addMultipleUnitsValidator = () => {
             .withMessage("Unit name is required")
             .isString()
             .withMessage("Unit name must be a string"),
+        body("units.*.isActive")
+            .isBoolean()
+            .withMessage("isActive must be a boolean"),
     ];
 };
 export {

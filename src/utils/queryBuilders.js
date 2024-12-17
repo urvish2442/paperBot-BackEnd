@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import {
     AvailableBoards,
     AvailableSubjects,
@@ -87,7 +88,7 @@ export const buildQueryForSubjects = (req) => {
 export const buildQueryForQuestions = (req) => {
     const reqQuery = { ...req.query };
     let match = { isActive: true, isVerified: true };
-    let sort = {};
+    let sort = { type: 1 };
 
     const page = Number(reqQuery.page) || 1;
     const limit = Number(reqQuery.limit) || 15;
@@ -103,7 +104,11 @@ export const buildQueryForQuestions = (req) => {
                 }
                 break;
             case "unit":
-                match.unit = reqQuery.unit;
+                try {
+                    match.unit = new mongoose.Types.ObjectId(reqQuery.unit);
+                } catch (error) {
+                    console.error("Invalid unit ID format:", error.message);
+                }
                 break;
             case "search":
                 match.$or = [
@@ -145,7 +150,7 @@ export const buildQueryForQuestions = (req) => {
             limit,
             customLabels: {
                 totalDocs: "count",
-                docs: "docs",
+                docs: "data",
             },
         },
     };

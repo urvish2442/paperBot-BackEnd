@@ -48,6 +48,7 @@ const subjectSchema = new Schema(
                 {
                     number: { type: Number, required: true },
                     name: { type: String, required: true },
+                    isActive: { type: Boolean, default: true },
                 },
             ],
             default: [],
