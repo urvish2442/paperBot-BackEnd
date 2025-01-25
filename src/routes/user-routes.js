@@ -4,6 +4,7 @@ import {
     assignRole,
     changeCurrentPassword,
     forgotPasswordRequest,
+    getAllUsers,
     getCurrentUser,
     handleSocialLogin,
     loginUser,
@@ -38,7 +39,11 @@ const app = Router();
 // Unsecured route
 app.route("/register").post(userRegisterValidator(), validate, registerUser);
 app.route("/login").post(userLoginValidator(), validate, loginUser);
-app.route("/verify-and-login").post(userVerifyAndLoginValidator(), validate, verifyAndLogin);
+app.route("/verify-and-login").post(
+    userVerifyAndLoginValidator(),
+    validate,
+    verifyAndLogin
+);
 app.route("/refresh-token").post(refreshAccessToken);
 // app.route("/verify-email/:verificationToken").get(verifyEmail);
 
@@ -78,6 +83,11 @@ app.route("/assign-role/:userId").post(
     userAssignRoleValidator(),
     validate,
     assignRole
+);
+app.route("/all").get(
+    verifyJWT,
+    verifyPermission([UserRolesEnum.ADMIN]),
+    getAllUsers
 );
 
 export default app;

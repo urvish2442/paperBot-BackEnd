@@ -65,16 +65,16 @@ const registerUser = asyncHandler(async (req, res) => {
     user.emailVerificationExpiry = tokenExpiry;
     await user.save({ validateBeforeSave: false });
 
-    await sendEmail({
-        email: user?.email,
-        subject: "Please verify your email",
-        mailgenContent: emailVerificationMailgenContent(
-            user.username,
-            `${req.protocol}://${req.get(
-                "host"
-            )}/api/v1/users/verify-email/${unHashedToken}`
-        ),
-    });
+    // await sendEmail({
+    //     email: user?.email,
+    //     subject: "Please verify your email",
+    //     mailgenContent: emailVerificationMailgenContent(
+    //         user.username,
+    //         `${req.protocol}://${req.get(
+    //             "host"
+    //         )}/api/v1/users/verify-email/${unHashedToken}`
+    //     ),
+    // });
 
     const createdUser = await User.findById(user._id).select(
         "-password -refreshToken -emailVerificationToken -emailVerificationExpiry"
@@ -109,7 +109,7 @@ const loginUser = asyncHandler(async (req, res) => {
         $or: [{ username }, { email }],
     });
 
-    if (!user) {
+    if (!user || !user.isActive) {
         throw new ApiError(404, "User does not exist");
     }
 
@@ -550,6 +550,53 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, updatedUser, "Avatar updated successfully"));
 });
 
+const getAllUsers = asyncHandler(async (req, res) => {
+    const { search, role, isActive, page = 1, limit = 10 } = req.query;
+
+    const query = {
+        role: { $ne: UserRolesEnum.ADMIN }, // Exclude ADMIN role
+    };
+
+    if (search) {
+        query.$or = [
+            { username: { $regex: search, $options: "i" } },
+            { email: { $regex: search, $options: "i" } },
+        ];
+    }
+
+    if (role) {
+        query.role = { $ne: UserRolesEnum.ADMIN, $eq: role };
+    }
+
+    if (isActive !== undefined && isActive !== null) {
+        query.isActive = isActive === "true";
+    }
+
+    const pageNumber = parseInt(page, 10) || 1;
+    const limitNumber = parseInt(limit, 10) || 10;
+    const skip = (pageNumber - 1) * limitNumber;
+
+    const users = await User.find(query)
+        .select(
+            "-password -refreshToken -emailVerificationToken -emailVerificationExpiry"
+        )
+        .skip(skip)
+        .limit(limitNumber)
+        .lean()
+        .exec();
+
+    const totalCount = await User.countDocuments(query);
+
+    return res.status(200).json(
+        new ApiResponse(200, {
+            users,
+            count: totalCount,
+            totalPages: Math.ceil(totalCount / limitNumber),
+            currentPage: pageNumber,
+        })
+    );
+});
+
 export {
     assignRole,
     changeCurrentPassword,
@@ -565,6 +612,7 @@ export {
     updateUserAvatar,
     verifyEmail,
     verifyAndLogin,
+    getAllUsers,
 };
 
 // const loginUser = asyncHandler(async (req, res) => {
