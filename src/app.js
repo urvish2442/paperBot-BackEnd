@@ -21,13 +21,12 @@ const app = express();
 
 const httpServer = createServer(app);
 
+const allowedOrigins = ["http://localhost:3000", "http://127.0.0.1:3000"];
+
 // global middlewares
 app.use(
     cors({
-        origin:
-            process.env.CORS_ORIGIN === "*"
-                ? "*"
-                : process.env.CORS_ORIGIN?.split(","),
+        origin: allowedOrigins,
         credentials: true,
     })
 );
