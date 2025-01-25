@@ -85,8 +85,8 @@ app.route("/assign-role/:userId").post(
     assignRole
 );
 app.route("/all").get(
-    verifyJWT,
-    verifyPermission([UserRolesEnum.ADMIN]),
+    // verifyJWT,
+    // verifyPermission([UserRolesEnum.ADMIN]),
     getAllUsers
 );
 

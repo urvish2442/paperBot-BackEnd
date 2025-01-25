@@ -31,7 +31,8 @@ import { UserRolesEnum } from "../constants.js";
 
 const router = express.Router();
 router.get("/", verifyJWT, getAllSubjectsValidator(), validate, getAllSubjects);
-router.get("/filters", verifyJWT, getAllConstants); // get all filters
+// router.get("/filters", verifyJWT, getAllConstants); // get all filters
+router.get("/filters", getAllConstants); // get all filters
 router.post(
     "/",
     verifyJWT,
