@@ -21,7 +21,13 @@ const app = express();
 
 const httpServer = createServer(app);
 
-const allowedOrigins = ["http://localhost:3000", "http://127.0.0.1:3000"];
+const allowedOrigins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://paperbot-one.vercel.app",
+    "*.vercel.com",
+    "*vercel.app",
+];
 
 // global middlewares
 app.use(
@@ -81,7 +87,6 @@ app.get("/", (req, res) => {
     });
 });
 
-// common error handling middleware
 app.use(errorHandler);
 
 export { httpServer };
