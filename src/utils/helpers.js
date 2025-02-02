@@ -186,3 +186,33 @@ export const getMongoosePaginationOptions = ({
 export const getRandomNumber = (max) => {
     return Math.floor(Math.random() * max);
 };
+
+const AVATAR = [
+    "Buster",
+    "Smokey",
+    "Dusty",
+    "Gracie",
+    "Misty",
+    "Snuggles",
+    "Gizmo",
+    "Snickers",
+    "Mimi",
+    "Angel",
+    "Bear",
+    "Charlie",
+    "Spooky",
+    "Mia",
+    "Pepper",
+    "Snowball",
+    "Oscar",
+    "Cookie",
+    "Sasha",
+    "Jasper",
+    "Felix",
+    "Aneka",
+];
+
+export const getRandomAvatar = () => {
+    const randomIndex = Math.floor(Math.random() * AVATAR.length);
+    return AVATAR[randomIndex];
+};

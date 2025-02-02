@@ -7,6 +7,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import {
     getLocalPath,
+    getRandomAvatar,
     getStaticFilePath,
     removeLocalFile,
 } from "../utils/helpers.js";
@@ -57,6 +58,7 @@ const registerUser = asyncHandler(async (req, res) => {
         username,
         isEmailVerified: false,
         role: UserRolesEnum.USER,
+        image: `https://api.dicebear.com/8.x/bottts-neutral/svg/seed=${getRandomAvatar()}`,
     });
 
     const { unHashedToken, hashedToken, tokenExpiry } =
@@ -578,7 +580,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
 
     const users = await User.find(query)
         .select(
-            "-password -refreshToken -emailVerificationToken -emailVerificationExpiry"
+            "-password -refreshToken -emailVerificationToken -emailVerificationExpiry -otp -otpExpiry"
         )
         .skip(skip)
         .limit(limitNumber)
