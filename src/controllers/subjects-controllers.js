@@ -4,6 +4,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { buildQueryForSubjects } from "../utils/queryBuilders.js";
 import { checkModelExistence } from "../models/modelSchemas.js";
+import mongoose from "mongoose";
 
 const generateModelName = (board, standard, name, medium, code) =>
     `${board}_${standard}_${name}_${code}_${medium}_QUESTIONS`.toLowerCase();
@@ -148,18 +149,29 @@ const addMultipleUnits = asyncHandler(async (req, res) => {
             return map;
         }, {});
 
-        const bulkOps = Object.entries(unitStatuses).map(
-            ([unitId, isActive]) => ({
+        const bulkOps = Object.entries(unitStatuses)
+            .filter(
+                ([unitId]) => unitId && mongoose.Types.ObjectId.isValid(unitId)
+            )
+            .map(([unitId, isActive]) => ({
                 updateMany: {
-                    filter: { unit: unitId },
-                    update: { isActive },
+                    filter: { unit: new mongoose.Types.ObjectId(unitId) },
+                    update: { $set: { isActive } },
                 },
-            })
-        );
+            }));
 
         if (bulkOps.length > 0) {
             await QuestionModel.bulkWrite(bulkOps);
         }
+
+        // for (const [unitId, isActive] of Object.entries(unitStatuses)) {
+        //     if (unitId && mongoose.Types.ObjectId.isValid(unitId)) {
+        //         await QuestionModel.updateMany(
+        //             { unit: mongoose.Types.ObjectId(unitId) },
+        //             { $set: { isActive } }
+        //         );
+        //     }
+        // }
 
         res.status(200).json({
             success: true,
