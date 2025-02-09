@@ -14,7 +14,6 @@ import {
     removeSchoolFromSubject,
     toggleSubjectStatus,
     addMultipleUnits,
-    getAllConstants,
 } from "../controllers/subjects-controllers.js";
 import {
     createSubjectValidator,
@@ -28,6 +27,7 @@ import {
     addMultipleUnitsValidator,
 } from "../validators/subject-validators.js";
 import { UserRolesEnum } from "../constants.js";
+import { getAllConstants } from "../controllers/question-types-controllers.js";
 
 const router = express.Router();
 router.get("/", verifyJWT, getAllSubjectsValidator(), validate, getAllSubjects);

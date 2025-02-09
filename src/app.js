@@ -75,6 +75,7 @@ import healthcheckRouter from "./routes/healthcheck.routes.js";
 import userRouter from "./routes/user-routes.js";
 import subjectRoutes from "./routes/subject-routes.js";
 import questionRoutes from "./routes/question-routes.js";
+import questionTypesRoutes from "./routes/que-types-routes.js";
 
 // * healthcheck
 app.use("/api/v1/healthcheck", healthcheckRouter);
@@ -83,6 +84,7 @@ app.use("/api/v1/healthcheck", healthcheckRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/subjects", subjectRoutes);
 app.use("/api/v1/questions", questionRoutes);
+app.use("/api/v1/question-types", questionTypesRoutes);
 
 app.get("/", (req, res) => {
     return res.status(200).json({

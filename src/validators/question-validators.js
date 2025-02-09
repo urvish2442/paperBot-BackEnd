@@ -1,15 +1,12 @@
 import { body, param, query } from "express-validator";
-import { AvailableQuestionTypes } from "../constants.js";
+// import { AvailableQuestionTypes } from "../constants.js";
 
 const createQuestionValidator = () => {
     return [
         param("modelName").notEmpty().withMessage("Subject Name is required"),
-        body("type")
-            .trim()
-            .notEmpty()
-            .withMessage("Question type is required")
-            .isIn(AvailableQuestionTypes)
-            .withMessage("Invalid question type"),
+        body("type").trim().notEmpty().withMessage("Question type is required"),
+        // .isIn(AvailableQuestionTypes)
+        // .withMessage("Invalid question type"),
         body("unit").trim().notEmpty().withMessage("Unit is required"),
         body("question").custom((value) => {
             if (typeof value === "string") {
@@ -136,10 +133,9 @@ const createQuestionValidator = () => {
 const updateQuestionValidator = () => {
     return [
         param("id").isMongoId().withMessage("Invalid question ID"),
-        body("type")
-            .optional()
-            .isIn(AvailableQuestionTypes)
-            .withMessage("Invalid question type"),
+        body("type").optional(),
+        // .isIn(AvailableQuestionTypes)
+        // .withMessage("Invalid question type"),
         body("unit").optional().isString().withMessage("Unit must be a string"),
         body("question")
             .optional()

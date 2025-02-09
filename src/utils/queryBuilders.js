@@ -4,7 +4,7 @@ import {
     AvailableSubjects,
     AvailableMediums,
     AvailableStandards,
-    AvailableQuestionTypes,
+    // AvailableQuestionTypes,
     UserRolesEnum,
 } from "../constants.js";
 export const buildQueryForSubjects = (req) => {
@@ -54,11 +54,11 @@ export const buildQueryForSubjects = (req) => {
                     const field = reqQuery.sortBy.startsWith("-")
                         ? reqQuery.sortBy.slice(1) // Remove the "-" prefix
                         : reqQuery.sortBy;
-
+                    delete sort.name;
                     if (["name", "board", "standard"].includes(field)) {
                         sort[field] = reqQuery.sortBy.startsWith("-") ? -1 : 1; // Descending for "-" prefix
                     } else {
-                        sort.subject = 1; // Default sorting
+                        sort.name = 1; // Default sorting
                     }
                 }
                 break;
@@ -105,9 +105,9 @@ export const buildQueryForQuestions = (req) => {
 
         switch (key) {
             case "type":
-                if (AvailableQuestionTypes.includes(reqQuery.type)) {
-                    match.type = reqQuery.type;
-                }
+                // if (AvailableQuestionTypes.includes(reqQuery.type)) {
+                match.type = reqQuery.type;
+                // }
                 break;
             case "unit":
                 try {
@@ -136,6 +136,7 @@ export const buildQueryForQuestions = (req) => {
                 match.isVerified = reqQuery.isVerified === "true";
                 break;
             case "sortBy":
+                delete sort.type;
                 if (["type", "unit", "created_by"].includes(reqQuery.sortBy)) {
                     sort[reqQuery.sortBy] =
                         reqQuery.sortOrder === "desc" ? -1 : 1;
