@@ -5,6 +5,7 @@ import { checkModelExistence } from "../models/modelSchemas.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { UserRolesEnum } from "../constants.js";
 import { Subject } from "../models/subjects-models.js";
+import mongoose from "mongoose";
 
 // Get All Questions
 export const getQuestions = asyncHandler(async (req, res) => {
@@ -37,13 +38,37 @@ export const getQuestions = asyncHandler(async (req, res) => {
 // Create Question
 export const createQuestion = asyncHandler(async (req, res) => {
     const { modelName } = req.params;
+    const { unit, type } = req.body;
 
-    const QuestionModel = await checkModelExistence(modelName);
+    const [QuestionModel, subject] = await Promise.all([
+        checkModelExistence(modelName),
+        Subject.findOne({ model_name: modelName }),
+    ]);
+
     if (!QuestionModel) {
         throw new ApiError(404, `Question model '${modelName}' not found`);
     }
+    if (!subject) {
+        throw new ApiError(404, "Subject not found");
+    }
+
+    const unitSet = new Set(subject.units.map((u) => u._id.toString()));
+    const typeSet = new Set(subject.questionTypes.map((t) => t._id.toString()));
+
+    if (!unitSet.has(unit)) {
+        throw new ApiError(400, "Invalid unit. Not found in subject units.");
+    }
+    if (!typeSet.has(type)) {
+        throw new ApiError(
+            400,
+            "Invalid type. Not found in subject questionTypes."
+        );
+    }
+
+    // Determine verification status based on user role
     const isVerified = req.user.role === UserRolesEnum.ADMIN;
     const question = { ...req.body, created_by: req.user._id, isVerified };
+
     const createdQuestion = await QuestionModel.create(question);
 
     return res
@@ -60,6 +85,9 @@ export const createQuestion = asyncHandler(async (req, res) => {
 // Get Question by ID
 export const getQuestionById = asyncHandler(async (req, res) => {
     const { modelName, id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        throw new ApiError(400, "Invalid question ID format");
+    }
 
     const QuestionModel = await checkModelExistence(modelName);
     if (!QuestionModel) {
@@ -77,20 +105,54 @@ export const getQuestionById = asyncHandler(async (req, res) => {
 // Update Question
 export const updateQuestion = asyncHandler(async (req, res) => {
     const { modelName, id } = req.params;
+    const { unit, type } = req.body;
 
-    const QuestionModel = await checkModelExistence(modelName);
+    const [QuestionModel, subject] = await Promise.all([
+        checkModelExistence(modelName),
+        Subject.findOne({ model_name: modelName }),
+    ]);
+
     if (!QuestionModel) {
         throw new ApiError(404, `Question model '${modelName}' not found`);
     }
+    if (!subject) {
+        throw new ApiError(404, "Subject not found");
+    }
 
-    const question = await QuestionModel.findByIdAndUpdate(id, req.body, {
-        new: true,
-    });
-    if (!question) throw new ApiError(404, "Question not found");
+    const unitSet = new Set(subject.units.map((u) => u._id.toString()));
+    const typeSet = new Set(subject.questionTypes.map((t) => t._id.toString()));
+
+    if (unit && !unitSet.has(unit)) {
+        throw new ApiError(400, "Invalid unit. Not found in subject units.");
+    }
+    if (type && !typeSet.has(type)) {
+        throw new ApiError(
+            400,
+            "Invalid type. Not found in subject questionTypes."
+        );
+    }
+
+    const updatedQuestion = await QuestionModel.findByIdAndUpdate(
+        id,
+        req.body,
+        {
+            new: true,
+        }
+    );
+
+    if (!updatedQuestion) {
+        throw new ApiError(404, "Question not found");
+    }
 
     return res
         .status(200)
-        .json(new ApiResponse(200, question, "Question updated successfully"));
+        .json(
+            new ApiResponse(
+                200,
+                updatedQuestion,
+                "Question updated successfully"
+            )
+        );
 });
 
 // Delete Question
