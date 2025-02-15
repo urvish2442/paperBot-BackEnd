@@ -4,7 +4,11 @@ import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 // Define the fixed schema for questions
 const questionSchema = new Schema(
     {
-        type: { type: String, required: true },
+        type: {
+            type: Schema.Types.ObjectId,
+            ref: "Subject.questionTypes",
+            required: true,
+        },
         isFormatted: { type: Boolean, default: false },
         question: {
             type: Schema.Types.Mixed,

@@ -14,6 +14,8 @@ import {
     removeSchoolFromSubject,
     toggleSubjectStatus,
     addMultipleUnits,
+    addOrUpdateMultipleQuestionTypes,
+    getAllConstants,
 } from "../controllers/subjects-controllers.js";
 import {
     createSubjectValidator,
@@ -25,14 +27,20 @@ import {
     toggleSubjectStatusValidator,
     getAllSubjectsValidator,
     addMultipleUnitsValidator,
+    addMultipleQuestionTypesValidator,
 } from "../validators/subject-validators.js";
 import { UserRolesEnum } from "../constants.js";
-import { getAllConstants } from "../controllers/question-types-controllers.js";
 
 const router = express.Router();
 router.get("/", verifyJWT, getAllSubjectsValidator(), validate, getAllSubjects);
 // router.get("/filters", verifyJWT, getAllConstants); // get all filters
-router.get("/filters", getAllConstants); // get all filters
+
+//** Get All Constants */
+
+router.get("/filters", getAllConstants);
+
+//** Create Subject */
+
 router.post(
     "/",
     verifyJWT,
@@ -41,6 +49,9 @@ router.post(
     validate,
     createSubject
 );
+
+//** Get Subject Details */
+
 router.get(
     "/:id",
     verifyJWT,
@@ -49,6 +60,9 @@ router.get(
     validate,
     getSubjectById
 );
+
+//** Update Subject */
+
 router.put(
     "/:id",
     verifyJWT,
@@ -57,6 +71,9 @@ router.put(
     validate,
     updateSubject
 );
+
+//** Delete Subject */
+
 router.delete(
     "/:id",
     verifyJWT,
@@ -65,6 +82,9 @@ router.delete(
     validate,
     deleteSubject
 );
+
+//** Add School to Subject */
+
 router.post(
     "/:id/schools",
     verifyJWT,
@@ -73,6 +93,9 @@ router.post(
     validate,
     addSchoolToSubject
 );
+
+//** Remove School from Subject */
+
 router.delete(
     "/:id/schools",
     verifyJWT,
@@ -81,6 +104,9 @@ router.delete(
     validate,
     removeSchoolFromSubject
 );
+
+//** Toggle Subject Status */
+
 router.patch(
     "/:id/status",
     verifyJWT,
@@ -89,6 +115,9 @@ router.patch(
     validate,
     toggleSubjectStatus
 );
+
+//** Add Multiple Units */
+
 router.post(
     "/:id/units",
     verifyJWT,
@@ -96,6 +125,17 @@ router.post(
     addMultipleUnitsValidator(),
     validate,
     addMultipleUnits
+);
+
+//** Add Multiple Question Types */
+
+router.post(
+    "/:id/question-types",
+    verifyJWT,
+    verifyPermission([UserRolesEnum.ADMIN]),
+    addMultipleQuestionTypesValidator(),
+    validate,
+    addOrUpdateMultipleQuestionTypes
 );
 
 export default router;

@@ -5,6 +5,12 @@ import { ApiError } from "../utils/ApiError.js";
 import { buildQueryForSubjects } from "../utils/queryBuilders.js";
 import { checkModelExistence } from "../models/modelSchemas.js";
 import mongoose from "mongoose";
+import {
+    AvailableBoards,
+    AvailableMediums,
+    AvailableStandards,
+    AvailableSubjects,
+} from "../constants.js";
 
 const generateModelName = (board, standard, name, medium, code) =>
     `${board}_${standard}_${name}_${code}_${medium}_QUESTIONS`.toLowerCase();
@@ -280,6 +286,73 @@ const toggleSubjectStatus = asyncHandler(async (req, res) => {
         );
 });
 
+const addOrUpdateMultipleQuestionTypes = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { questionTypes } = req.body;
+
+    if (!Array.isArray(questionTypes) || questionTypes.length === 0) {
+        throw new ApiError(
+            400,
+            "Invalid input: questionTypes must be a non-empty array."
+        );
+    }
+
+    try {
+        const subject = await Subject.findById(id);
+        if (!subject) {
+            throw new ApiError(404, "Subject not found.");
+        }
+
+        const existingQuestionTypeMap = new Map(
+            subject.questionTypes.map((qt) => [qt._id.toString(), qt])
+        );
+
+        questionTypes.forEach((qt) => {
+            if (qt._id && existingQuestionTypeMap.has(qt._id)) {
+                const existingQT = existingQuestionTypeMap.get(qt._id);
+                existingQT.name = qt.name;
+                existingQT.description = qt.description;
+            } else {
+                subject.questionTypes.push(qt);
+            }
+        });
+
+        await subject.save();
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    subject,
+                    "Question types updated successfully."
+                )
+            );
+    } catch (error) {
+        console.error("Error updating question types:", error);
+        throw new ApiError(
+            500,
+            "An error occurred while updating question types.",
+            error.message
+        );
+    }
+});
+
+const getAllConstants = asyncHandler(async (req, res) => {
+    const constants = {
+        boards: AvailableBoards,
+        subjects: AvailableSubjects,
+        mediums: AvailableMediums,
+        standards: AvailableStandards,
+    };
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, constants, "All Filters fetched successfully")
+        );
+});
+
 export {
     getAllSubjects,
     createSubject,
@@ -290,4 +363,6 @@ export {
     removeSchoolFromSubject,
     toggleSubjectStatus,
     addMultipleUnits,
+    addOrUpdateMultipleQuestionTypes,
+    getAllConstants,
 };

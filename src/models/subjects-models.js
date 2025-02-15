@@ -53,6 +53,15 @@ const subjectSchema = new Schema(
             ],
             default: [],
         },
+        questionTypes: {
+            type: [
+                {
+                    name: { type: String, required: true },
+                    description: { type: String, required: true },
+                },
+            ],
+            default: [],
+        },
         outlines: {
             type: [
                 {

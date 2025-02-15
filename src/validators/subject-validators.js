@@ -142,6 +142,25 @@ const addMultipleUnitsValidator = () => {
             .withMessage("isActive must be a boolean"),
     ];
 };
+
+const addMultipleQuestionTypesValidator = () => {
+    return [
+        param("id").isMongoId().withMessage("Invalid subject ID"),
+        body("questionTypes")
+            .isArray({ min: 1 })
+            .withMessage("questionTypes must be a non-empty array"),
+        body("questionTypes.*.name")
+            .notEmpty()
+            .withMessage("Question type name is required")
+            .isString()
+            .withMessage("Question type name must be a string"),
+        body("questionTypes.*.description")
+            .notEmpty()
+            .withMessage("Question type description is required")
+            .isString()
+            .withMessage("Question type description must be a string"),
+    ];
+};
 export {
     createSubjectValidator,
     updateSubjectValidator,
@@ -152,4 +171,5 @@ export {
     toggleSubjectStatusValidator,
     getAllSubjectsValidator,
     addMultipleUnitsValidator,
+    addMultipleQuestionTypesValidator,
 };
