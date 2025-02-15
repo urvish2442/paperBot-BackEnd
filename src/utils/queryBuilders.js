@@ -105,9 +105,11 @@ export const buildQueryForQuestions = (req) => {
 
         switch (key) {
             case "type":
-                // if (AvailableQuestionTypes.includes(reqQuery.type)) {
-                match.type = reqQuery.type;
-                // }
+                try {
+                    match.type = new mongoose.Types.ObjectId(reqQuery.type);
+                } catch (error) {
+                    console.error("Invalid unit ID format:", error.message);
+                }
                 break;
             case "unit":
                 try {
