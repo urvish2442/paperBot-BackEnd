@@ -23,6 +23,7 @@
         "bcrypt": "^5.1.0",
         "cookie-parser": "^1.4.7",
         "cors": "^2.8.5",
+        "dayjs": "^1.11.13",
         "dotenv": "^16.0.3",
         "express": "4.21.1",
         "express-compression": "^1.0.2",

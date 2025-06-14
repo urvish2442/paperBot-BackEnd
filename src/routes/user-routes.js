@@ -6,6 +6,7 @@ import {
     forgotPasswordRequest,
     getAllUsers,
     getCurrentUser,
+    getUserStats,
     handleSocialLogin,
     loginUser,
     logoutUser,
@@ -85,9 +86,14 @@ app.route("/assign-role/:userId").post(
     assignRole
 );
 app.route("/all").get(
-    // verifyJWT,
-    // verifyPermission([UserRolesEnum.ADMIN]),
+    verifyJWT,
+    verifyPermission([UserRolesEnum.ADMIN]),
     getAllUsers
+);
+app.route("/stats").get(
+    verifyJWT,
+    verifyPermission([UserRolesEnum.ADMIN]),
+    getUserStats
 );
 
 export default app;

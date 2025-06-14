@@ -17,6 +17,8 @@ import {
     otpMailgenContent,
     sendEmail,
 } from "../utils/mail.js";
+import dayjs from "dayjs";
+import { Subject } from "../models/subjects-models.js";
 
 const generateAccessAndRefreshTokens = async (userId) => {
     try {
@@ -599,6 +601,32 @@ const getAllUsers = asyncHandler(async (req, res) => {
     );
 });
 
+const getUserStats = asyncHandler(async (req, res) => {
+    const endOfLastMonth = dayjs().subtract(1, "month").endOf("month").toDate();
+
+    const userFilter = { role: { $ne: "admin" } };
+
+    const [totalUsers, usersTillLastMonth, totalSubjects, activeSubjects] =
+        await Promise.all([
+            User.countDocuments(userFilter),
+            User.countDocuments({
+                ...userFilter,
+                createdAt: { $lte: endOfLastMonth },
+            }),
+            Subject.countDocuments(),
+            Subject.countDocuments({ isActive: true }),
+        ]);
+
+    return res.status(200).json(
+        new ApiResponse(200, {
+            totalUsers,
+            usersTillLastMonth,
+            totalSubjects,
+            activeSubjects,
+        })
+    );
+});
+
 export {
     assignRole,
     changeCurrentPassword,
@@ -615,6 +643,7 @@ export {
     verifyEmail,
     verifyAndLogin,
     getAllUsers,
+    getUserStats,
 };
 
 // const loginUser = asyncHandler(async (req, res) => {
