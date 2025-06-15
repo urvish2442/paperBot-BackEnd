@@ -76,6 +76,10 @@ const subjectSchema = new Schema(
             required: true,
             unique: true,
         },
+        isSequenceRequired: {
+            type: Boolean,
+            default: false,
+        },
         created_by: {
             type: Schema.Types.ObjectId,
             ref: "User",

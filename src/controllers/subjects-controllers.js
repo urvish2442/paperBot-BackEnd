@@ -33,7 +33,8 @@ const getAllSubjects = asyncHandler(async (req, res) => {
 
 //** Create Subject */
 const createSubject = asyncHandler(async (req, res) => {
-    const { board, standard, name, medium, code, price } = req.body;
+    const { board, standard, name, medium, code, price, isSequenceRequired } =
+        req.body;
 
     if (!board || !standard || !name || !medium || !code) {
         throw new ApiError(400, "All required fields must be provided");
@@ -65,6 +66,7 @@ const createSubject = asyncHandler(async (req, res) => {
         created_by: req?.user._id,
         model_name: generatedModelName,
         price,
+        isSequenceRequired: isSequenceRequired || false,
     };
 
     const newSubject = new Subject(subjectData);

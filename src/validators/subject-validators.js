@@ -37,6 +37,9 @@ const createSubjectValidator = () => {
             .optional()
             .isNumeric()
             .withMessage("Price must be a number"),
+        body("isSequenceRequired")
+            .isBoolean()
+            .withMessage("isSequenceRequired must be a boolean"),
     ];
 };
 
@@ -64,6 +67,9 @@ const updateSubjectValidator = () => {
             .optional()
             .isNumeric()
             .withMessage("Price must be a number"),
+        body("isSequenceRequired")
+            .isBoolean()
+            .withMessage("isSequenceRequired must be a boolean"),
     ];
 };
 
