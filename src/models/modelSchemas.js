@@ -10,6 +10,7 @@ const questionSchema = new Schema(
             required: true,
         },
         isFormatted: { type: Boolean, default: false },
+        isParagraph: { type: Boolean, default: false },
         question: {
             type: Schema.Types.Mixed,
             required: true,
@@ -20,6 +21,26 @@ const questionSchema = new Schema(
                     );
                 },
                 message: "Question must be either a string or an object.",
+            },
+        },
+        questionsArray: {
+            type: [
+                new Schema(
+                    {
+                        question: {
+                            type: String,
+                            required: true,
+                        },
+                    },
+                    { _id: true }
+                ),
+            ],
+            default: [],
+            validate: {
+                validator: function (value) {
+                    return Array.isArray(value);
+                },
+                message: "Questions array must be an array of objects.",
             },
         },
         answer: {
